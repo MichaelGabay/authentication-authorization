@@ -1,0 +1,3 @@
+# test
+GET http://localhost:3000/test
+
