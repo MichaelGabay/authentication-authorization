@@ -1,3 +1,26 @@
-# test
+### test
 GET http://localhost:3000/test
 
+### signup
+POST http://localhost:3000/user/signup
+Content-Type: application/json
+
+{
+    "name":"beni",
+    "email":"beni@example.com",
+    "password":"12345"
+}
+
+### login
+POST http://localhost:3000/user/login
+Content-Type: application/json
+
+{
+    "email":"beni@example.com",
+    "password":"12345",
+    "deviceDetails":"Chrome 112"
+}
+
+### auth
+POST http://localhost:3000/auth
+Content-Type: application/json
