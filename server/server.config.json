@@ -1,0 +1,5 @@
+{
+    "accessExpires": "10s",
+    "refreshExpires": "30d",
+    "makeRetouch": false
+}
