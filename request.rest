@@ -24,3 +24,15 @@ Content-Type: application/json
 ### auth
 POST http://localhost:3000/auth
 Content-Type: application/json
+
+### end connection for all
+DELETE http://localhost:3000/user/endConnectionForAll
+Content-Type: application/json
+
+### end connection 
+DELETE http://localhost:3000/user/endConnection
+Content-Type: application/json
+
+{
+    "refreshId":"648ec7f421944bf83f333ce7"
+}
