@@ -10,39 +10,66 @@ const userCtrl = {
         try {
             body.password = await bcrypt.hash(body.password, 10);
             const user = await userModel.create(body);
-            res.json({ status: true, msg: "user created successfully" }).status(201)
+            res.status(201).json({ message: "user created successfully" })
         } catch (error) {
-            res.json(error)
+            if (error.code == 11000) {
+                return res.status(409).json({ message: "user alrady exsist" })
+            }
+            res.status(500).json(error)
         }
     },
     async login({ body }, res) {
         const errorObject = { status: false, msg: "error try again" }
         try {
-            let { _id, role, password, name } = await userModel.findOne({ email: body.email }, { loggedUsers: 0 });
-            console.log("load");
+            let { _id, role, password, name } = await userModel.findOne({ email: body.email }, { loggedUsers: 0 }) || {};
+            if (!_id) return res.status(404).json({ message: "user not found" })
 
-            if (!_id) throw errorObject;
-            if (!await bcrypt.compare(body.password, password)) throw errorObject;
-            // const refreshToken = jwt.sign({ sub: user._id }, process.env.SECRET_KEY_WORD, { expiresIn: refreshExpires })
+            if (!await bcrypt.compare(body.password, password)) {
+                return res.status(401).json({ message: "icorrect details" })
+            }
             const refreshToken = generateToken({ sub: _id, role }, refreshExpires);
-            // const accessToken = jwt.sign({ sub: user._id }, process.env.SECRET_KEY_WORD, { expiresIn: accessExpires })
             const accessToken = generateToken({ sub: _id, role }, accessExpires);
+            // create login details object
             const logUser = { date: Date.now(), deviceDetails: body.deviceDetails, refreshToken }
             await userModel.updateOne({ _id }, { $push: { loggedUsers: logUser } })
             res.cookie('refreshCookie', "bearer " + refreshToken, { httpOnly: true });
             res.cookie('accessCookie', "bearer " + accessToken);
-            res.json({ staus: true, msg: `user ${name} login successfully` })
+            res.status(200).json({ message: `user ${name} login successfully` })
         }
-        catch {
-            res.json(errorObject)
+        catch (error) {
+            res.status(500).json(error)
         }
     },
 
-    async endConnectionForAll() {
+    async endConnectionForAll(req, res) {
+        try {
+            const theRefreshToken = req.cookies.refreshCookie.split(' ')[1];
+            const user = await userModel.findOne({ _id: req.user.sub }, { loggedUsers: 1 })
+            user.loggedUsers = user.loggedUsers.filter(({ refreshToken }) => refreshToken == theRefreshToken);
+            user.save()
+            res.status(200).json({ message: "dsiconnection successful for all users" });
 
+        } catch (error) {
+            res.status(500).json(error)
+        }
     },
-    async endConnection() {
-
+    async endConnection({ body, user }, res) {
+        try {
+            userModel.updateOne({ _id: user.sub }, { $pull: { loggedUsers: { _id: body.refreshId } } })
+            res.status(200).json({ message: "dsiconnected successful" });
+        }
+        catch (error) {
+            res.status(500).json(error)
+        }
+    },
+    async getUser({ body, user }, res) {
+        try {
+            userModel.updateOne({ _id: user.sub }, { $pull: { loggedUsers: { _id: body.refreshId } } })
+            res.status(200).json({ message: "dsiconnected successful" });
+        }
+        catch (error) {
+            res.status(500).json(error)
+        }
     }
 }
 

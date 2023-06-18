@@ -5,7 +5,7 @@ require("dotenv").config();
 const generateToken = require("../utils/generatToken.js")
 
 exports.auth = async (req, res, next) => {
-    const errorObject = { status: false, msg: "unauthorized" };
+    const errorObject = { message: "unauthorized" };
     let userPayload = {};
     try {
         // trying to decode the access token
@@ -51,7 +51,15 @@ exports.auth = async (req, res, next) => {
         next();
     }
     catch (error) {
-        return res.json(error).status(401);
+        return res.status(401).json(error);
+    }
+}
+
+
+exports.authAdmin = ({ user: { role } }, res, next) => {
+    if (role == "admin") next();
+    else {
+        return res.status(401).json({ message: "unauthorized" })
     }
 }
 
