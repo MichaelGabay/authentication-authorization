@@ -1,5 +1,5 @@
-const { signup, login, endConnection, endConnectionForAll } = require("../controllers/userController")
-const { auth } = require("../middlewares/authMiddleware")
+const { signup, login, endConnection, endConnectionForAll, getUser } = require("../controllers/userController")
+const { auth, authAdmin } = require("../middlewares/authMiddleware")
 const router = require("express").Router()
 
 // signup
@@ -12,6 +12,7 @@ router.delete("/endConnectionForAll", auth, endConnectionForAll)
 
 router.delete("/endConnection", auth, endConnection)
 
-router.get("/getUser",)
+
+router.get("/getUser", auth, getUser)
 
 module.exports = router

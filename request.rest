@@ -5,7 +5,7 @@ GET http://localhost:3000/test
 POST http://localhost:3000/user/signup
 Content-Type: application/json
 
-{
+{   
     "name":"beni",
     "email":"beni@example.com",
     "password":"12345"
@@ -36,3 +36,7 @@ Content-Type: application/json
 {
     "refreshId":"648ec7f421944bf83f333ce7"
 }
+
+### get user
+GET http://localhost:3000/user/getUser
+Content-Type: application/json

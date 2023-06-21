@@ -46,6 +46,7 @@ exports.auth = async (req, res, next) => {
             if (modifiedCount != 1) throw errorObject;
             res.cookie('refreshCookie', "bearer " + newRefreshToken);
         }
+
         const newAccessToken = generateToken({ sub: userPayload.sub, role: userPayload.role }, accessExpires);
         res.cookie('accessCookie', "bearer " + newAccessToken);
         next();
@@ -62,5 +63,4 @@ exports.authAdmin = ({ user: { role } }, res, next) => {
         return res.status(401).json({ message: "unauthorized" })
     }
 }
-
 

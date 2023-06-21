@@ -3,6 +3,7 @@ const bcrypt = require("bcrypt")
 const jwt = require("jsonwebtoken")
 const { accessExpires, refreshExpires } = require("../server.config.json");
 const generateToken = require("../utils/generatToken");
+const { json } = require("express");
 require("dotenv").config();
 
 const userCtrl = {
@@ -19,7 +20,6 @@ const userCtrl = {
         }
     },
     async login({ body }, res) {
-        const errorObject = { status: false, msg: "error try again" }
         try {
             let { _id, role, password, name } = await userModel.findOne({ email: body.email }, { loggedUsers: 0 }) || {};
             if (!_id) return res.status(404).json({ message: "user not found" })
@@ -43,10 +43,9 @@ const userCtrl = {
 
     async endConnectionForAll(req, res) {
         try {
-            const theRefreshToken = req.cookies.refreshCookie.split(' ')[1];
-            const user = await userModel.findOne({ _id: req.user.sub }, { loggedUsers: 1 })
-            user.loggedUsers = user.loggedUsers.filter(({ refreshToken }) => refreshToken == theRefreshToken);
-            user.save()
+            const user = await userModel.updateOne({ _id: req.user.sub }, { loggedUsers: [] })
+
+            // user.save()
             res.status(200).json({ message: "dsiconnection successful for all users" });
 
         } catch (error) {
@@ -62,15 +61,17 @@ const userCtrl = {
             res.status(500).json(error)
         }
     },
-    async getUser({ body, user }, res) {
+    async getUser({ user }, res) {
         try {
-            userModel.updateOne({ _id: user.sub }, { $pull: { loggedUsers: { _id: body.refreshId } } })
-            res.status(200).json({ message: "dsiconnected successful" });
-        }
-        catch (error) {
-            res.status(500).json(error)
+            const myUser = await userModel.findOne({ _id: user.sub }, { "loggedUsers.refreshToken": 0, password: 0 })
+
+
+            res.status(200).json(myUser)
+        } catch (error) {
+            res.status(400).json(error)
         }
     }
+
 }
 
 module.exports = userCtrl;
