@@ -1,9 +1,7 @@
 const userModel = require("../models/userModel")
 const bcrypt = require("bcrypt")
-const jwt = require("jsonwebtoken")
 const { accessExpires, refreshExpires } = require("../server.config.json");
 const generateToken = require("../utils/generatToken");
-const { json } = require("express");
 require("dotenv").config();
 
 const userCtrl = {
@@ -14,7 +12,7 @@ const userCtrl = {
             res.status(201).json({ message: "user created successfully" })
         } catch (error) {
             if (error.code == 11000) {
-                return res.status(409).json({ message: "user alrady exsist" })
+                return res.status(409).json({ message: "user already exist" })
             }
             res.status(500).json(error)
         }
@@ -25,7 +23,7 @@ const userCtrl = {
             if (!_id) return res.status(404).json({ message: "user not found" })
 
             if (!await bcrypt.compare(body.password, password)) {
-                return res.status(401).json({ message: "icorrect details" })
+                return res.status(401).json({ message: "incorrect details" })
             }
             const refreshToken = generateToken({ sub: _id, role }, refreshExpires);
             const accessToken = generateToken({ sub: _id, role }, accessExpires);
@@ -46,7 +44,7 @@ const userCtrl = {
             const user = await userModel.updateOne({ _id: req.user.sub }, { loggedUsers: [] })
 
             // user.save()
-            res.status(200).json({ message: "dsiconnection successful for all users" });
+            res.status(200).json({ message: "disconnection successful for all users" });
 
         } catch (error) {
             res.status(500).json(error)
@@ -55,7 +53,7 @@ const userCtrl = {
     async endConnection({ body, user }, res) {
         try {
             userModel.updateOne({ _id: user.sub }, { $pull: { loggedUsers: { _id: body.refreshId } } })
-            res.status(200).json({ message: "dsiconnected successful" });
+            res.status(200).json({ message: "disconnected successful" });
         }
         catch (error) {
             res.status(500).json(error)
