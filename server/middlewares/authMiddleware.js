@@ -19,7 +19,7 @@ exports.auth = async (req, res, next) => {
         catch {
             console.log("checking if refresh token is valid");
         }
-        // checking if the refresh token is valid token
+        // checking if the refresh token is a valid token
         const refreshToken = req.cookies.refreshCookie.split(' ')[1];
         if (!refreshToken) throw errorObject;
         try {
@@ -30,19 +30,19 @@ exports.auth = async (req, res, next) => {
             throw errorObject;
         }
 
-        // if we don't wonts to retouch the user
+        // if we don't want to retouch the user
         if (!makeRetouch) {
-            // chicking if the refresh token is exists in the db
+            // checking if the refresh token is exists in the db
             const { _id } = await userModel.findOne({ _id: userPayload.sub, "loggedUsers.refreshToken": refreshToken }, { _id: 1 })
             if (!_id) throw errorObject;
         }
-        // if we want's
+        // if we want to
         else {
-            console.log("making retuch");
+            console.log("making retouch");
             const newRefreshToken = generateToken({ sub: userPayload.sub, role: userPayload.role }, refreshExpires);
             // updating the refresh in db
             const { modifiedCount } = await userModel.updateOne({ _id: userPayload.sub, "loggedUsers.refreshToken": refreshToken }, { "loggedUsers.$.refreshToken": newRefreshToken })
-            //  if the refresh not exsist in the db  
+            //  if the refresh not exist in the db  
             if (modifiedCount != 1) throw errorObject;
             res.cookie('refreshCookie', "bearer " + newRefreshToken);
         }
